@@ -1,0 +1,22 @@
+{
+  "name": "vi-vibevoice",
+  "version": "0.2.0",
+  "description": "Lightweight desktop speech-to-text client: records audio and sends it to a configurable remote ASR API.",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "check:js": "node --check electron/main.js && node --check electron/preload.js && node --check src/app.js"
+  },
+  "keywords": [
+    "electron",
+    "speech-to-text",
+    "asr",
+    "vietnamese"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^37.2.0"
+  }
+}

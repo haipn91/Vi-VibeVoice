@@ -1,0 +1,9 @@
+# May chu ASR + CAPU (FastAPI) — giong stack local nhung lang nghe 0.0.0.0 de client ket noi xa.
+# Cai tren may co GPU (khuyen nghi cho CAPU ONNX): pip install -r python/requirements-asr-capu-api.txt
+# Sau do: onnxruntime ban CPU; neu dung CAPU ONNX tren GPU hay thay bang onnxruntime-gpu (dong bo CUDA PyTorch).
+#
+#   pip install -r python/requirements-asr-capu-api.txt
+#   pip uninstall -y onnxruntime && pip install onnxruntime-gpu
+#
+-r requirements-local-asr.txt
+-r requirements-capu.txt

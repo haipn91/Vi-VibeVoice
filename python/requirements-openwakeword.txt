@@ -1,0 +1,4 @@
+# Wake word: openWakeWord (ONNX on Windows). First run may download small models from GitHub.
+openwakeword>=0.6.0
+sounddevice>=0.4.6
+numpy>=1.22

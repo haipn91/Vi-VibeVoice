@@ -1,0 +1,2 @@
+# Mic capture dùng chung. Wake word: pip install -r python/requirements-openwakeword.txt (openWakeWord).
+sounddevice>=0.4.7

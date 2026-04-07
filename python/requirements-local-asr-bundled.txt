@@ -1,0 +1,12 @@
+# Embedded Windows runtime for the installer: local ASR + optional wake word (same as requirements.txt tail).
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart>=0.0.6
+sherpa-onnx>=1.10.0
+huggingface_hub>=0.20.0
+soundfile>=0.12.0
+numpy>=1.20.0
+imageio-ffmpeg>=0.4.9
+sounddevice>=0.4.7
+# Wake word ONNX (tải model lần đầu khi bật listener — không bundle model trong exe)
+-r requirements-openwakeword.txt

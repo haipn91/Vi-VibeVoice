@@ -1,0 +1,15 @@
+# Dau cau + viet hoa tieng Viet sau ASR (dragonSwing/xlm-roberta-capu).
+# ONNX FP32: python scripts/export_capu_onnx.py -> examples/onnx/capu-seq2labels.onnx
+# ONNX INT8: python scripts/quantize_capu_onnx.py -> capu-seq2labels.int8.onnx (can onnx + onnxruntime)
+# Chay ORT: set GIPFORMER_CAPU_ONNX=1 (van can torch cho tokenizer/preprocess GecBERT)
+# Cai: pip install -r python/requirements-capu.txt
+# Bat: set GIPFORMER_CAPU=1
+
+torch>=2.0.0
+transformers>=4.18.0,<4.42.0
+sentencepiece>=0.1.99
+onnxruntime>=1.16.0
+onnx>=1.14.0
+# Export ONNX: PyTorch 2.5+ can onnxscript neu khong dung dynamo=False trong export script
+onnxscript>=0.1.0
+# goi onnx (protobuf) co the loi WinError 206 path qua dai — khong bat buoc

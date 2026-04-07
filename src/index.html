@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vi-VibeVoice</title>
+    <link rel="icon" type="image/png" href="../assets/icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-decor">
+      <div class="background-orb orb-a"></div>
+      <div class="background-orb orb-b"></div>
+      <div class="grid-mask"></div>
+    </div>
+
+    <div class="app-layout">
+      <aside class="sidebar panel">
+        <div class="sidebar-brand">
+          <img src="../assets/icon.png" alt="" class="sidebar-logo" width="40" height="40" />
+          <div class="sidebar-brand-text">
+            <span class="sidebar-title">Vi-VibeVoice</span>
+            <span class="sidebar-tagline">Vietnamese ASR</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav" aria-label="Main navigation">
+          <button type="button" class="nav-item is-active" data-view="home">Home</button>
+          <button type="button" class="nav-item" data-view="history">History</button>
+          <button type="button" class="nav-item" data-view="settings">Settings</button>
+        </nav>
+        <div class="sidebar-footer">
+          <span id="appVersionLabel" class="version-label">v0.1.0</span>
+        </div>
+      </aside>
+
+      <main class="content-area">
+        <section id="view-home" class="view is-active" data-view="home">
+          <header class="view-hero">
+            <h1 class="hero-title">Speak, done.</h1>
+            <p class="hero-sub">
+              <span class="hero-lead">
+                Keyboard shortcut: <kbd id="shortcutKbdHome">Ctrl + `</kbd> — start/stop recording
+              </span>
+              <span class="hero-note">Recording status stays visible in a corner if you minimize this window.</span>
+            </p>
+          </header>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <span class="stat-label">Today</span>
+              <p class="stat-numbers">
+                <strong id="statTodayWords">0</strong>
+                <span class="stat-unit">words</span>
+                <span class="stat-dot">·</span>
+                <strong id="statTodayUses">0</strong>
+                <span class="stat-unit">uses</span>
+              </p>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">All time</span>
+              <p class="stat-numbers">
+                <strong id="statTotalWords">0</strong>
+                <span class="stat-unit">words</span>
+                <span class="stat-dot">·</span>
+                <strong id="statTotalUses">0</strong>
+                <span class="stat-unit">uses</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="home-panel panel">
+            <div class="shortcut-banner">
+              <div>
+                <span class="eyebrow">Quick record</span>
+                <p class="shortcut-desc">Works on top of your other windows.</p>
+              </div>
+              <code class="shortcut-pill" id="shortcutLabel"></code>
+            </div>
+            <div class="quick-actions">
+              <button id="recordButton" type="button" class="primary-button">Start recording</button>
+              <button id="stopButton" type="button" class="ghost-button" disabled>Stop</button>
+              <button id="copyButton" type="button" class="ghost-button">Copy transcripts</button>
+            </div>
+            <div class="status-grid">
+              <div class="status-pill status-pill-wide">
+                <span>Status</span>
+                <strong id="recordingStatus">Ready</strong>
+              </div>
+            </div>
+            <div class="signal-panel">
+              <div class="meter-header">
+                <span>Input level</span>
+                <span id="levelLabel">0%</span>
+              </div>
+              <div class="meter-track">
+                <div id="levelBar" class="meter-fill"></div>
+              </div>
+              <p class="helper-text"><strong>Start</strong> opens the mic; <strong>Stop</strong> runs ASR.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-history" class="view" data-view="history" hidden>
+          <header class="view-toolbar">
+            <div>
+              <p class="eyebrow">Transcripts</p>
+              <h2>History</h2>
+            </div>
+            <button id="clearButton" type="button" class="ghost-button subtle-button">Clear history</button>
+          </header>
+          <div id="transcriptList" class="transcript-list"></div>
+        </section>
+
+        <section id="view-settings" class="view" data-view="settings" hidden>
+          <header class="view-toolbar view-toolbar-settings">
+            <div>
+              <p class="eyebrow">Configuration</p>
+              <h2>Remote API &amp; output</h2>
+            </div>
+            <div class="settings-toolbar-actions">
+              <p id="settingsSaveFeedback" class="settings-save-feedback" role="status" aria-live="polite" hidden></p>
+              <button id="saveSettingsButton" type="button" class="primary-button compact-button">Save settings</button>
+            </div>
+          </header>
+
+          <div class="panel pad-panel settings-section">
+            <h3 class="settings-block-title">Speech recognition (remote API)</h3>
+            <p id="embeddedAsrHint" class="full-span muted small" hidden></p>
+            <div class="settings-grid">
+              <label class="full-span">
+                <span>ASR endpoint URL</span>
+                <input id="apiEndpoint" type="text" placeholder="https://api.example.com/asr/transcribe" />
+              </label>
+              <label class="full-span">
+                <span>API key (optional)</span>
+                <input id="apiKey" type="password" autocomplete="off" placeholder="Sent as Authorization: Bearer … if Headers JSON has no Authorization" />
+              </label>
+              <label>
+                <span>HTTP method</span>
+                <select id="apiMethod">
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                </select>
+              </label>
+              <label>
+                <span>Audio form field</span>
+                <input id="audioField" type="text" placeholder="audio" />
+              </label>
+              <label>
+                <span>JSON path for transcript text</span>
+                <input id="responseTextPath" type="text" placeholder="text" />
+              </label>
+              <label class="full-span">
+                <span>Headers (JSON, optional — overrides Bearer from API key if you set Authorization here)</span>
+                <textarea id="headersJson" rows="3" placeholder="{&quot;X-Custom&quot;:&quot;value&quot;}"></textarea>
+              </label>
+              <label class="full-span">
+                <span>Extra form fields (JSON)</span>
+                <textarea id="extraFormDataJson" rows="3" placeholder="{&quot;language&quot;:&quot;vi&quot;}"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="panel pad-panel settings-section">
+            <h3 class="settings-block-title">Shortcut &amp; output</h3>
+            <div class="settings-grid">
+              <label class="full-span">
+                <span>Toggle recording shortcut</span>
+                <input id="shortcutInput" type="text" placeholder="Control+Backquote" />
+              </label>
+              <p id="shortcutRegisterHint" class="full-span muted small shortcut-register-hint" hidden></p>
+              <label class="toggle-row">
+                <span>After ASR: copy to clipboard</span>
+                <input id="copyAsrToClipboard" type="checkbox" />
+              </label>
+              <label class="toggle-row">
+                <span>After ASR: minimize then paste (Ctrl+V) into focused app</span>
+                <input id="pasteToForegroundAfterAsr" type="checkbox" />
+              </label>
+              <label>
+                <span>Delay before paste (ms)</span>
+                <input id="pasteDelayMs" type="number" min="0" max="5000" step="100" />
+              </label>
+              <label class="toggle-row">
+                <span>Minimize window before paste</span>
+                <input id="minimizeBeforePaste" type="checkbox" />
+              </label>
+              <label class="toggle-row full-span">
+                <span>Show floating recording status (corner of screen — on when using global shortcut or Start)</span>
+                <input id="uiRecordingHud" type="checkbox" />
+              </label>
+            </div>
+          </div>
+
+          <div class="note-card pad-panel">
+            <h3>Gợi ý</h3>
+            <p>
+              Bản cài gọn chỉ gửi audio tới URL bạn cấu hình. Điền <strong>API key</strong> nếu máy chủ yêu cầu Bearer token; hoặc ghi đầy đủ
+              <code>Authorization</code> trong Headers JSON. Tắt “floating status” nếu không muốn ô trạng thái góc màn hình.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="transcriptItemTemplate">
+      <article class="transcript-item">
+        <header>
+          <div>
+            <strong class="transcript-title"></strong>
+            <p class="transcript-meta"></p>
+          </div>
+          <span class="transcript-tag"></span>
+        </header>
+        <p class="transcript-content"></p>
+        <pre class="transcript-timing" hidden></pre>
+        <div class="transcript-actions">
+          <button type="button" class="ghost-button subtle-button paste-foreground-button">
+            Paste into app (Ctrl+V)
+          </button>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
