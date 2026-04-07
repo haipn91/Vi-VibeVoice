@@ -1,0 +1,9 @@
+node_modules/
+release/
+bundled/
+build/cache/
+.venv/
+.venv2/
+*.log
+.DS_Store
+Thumbs.db
