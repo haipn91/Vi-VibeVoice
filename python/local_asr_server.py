@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ASR cuc bo cho Vi-VibeVoice: gipformer ONNX (sherpa-onnx), chi lang nghe loopback.
-Tu dong them examples/ vao PYTHONPATH.
+Modules ASR/CAPU trong cung thu muc python/ (gipformer_asr.py, vi_capu_punctuate.py, …).
 
 Cai dat: pip install -r python/requirements-local-asr.txt
 
@@ -26,7 +26,8 @@ import traceback
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "examples"))
+_PY_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_PY_DIR))
 
 import os
 

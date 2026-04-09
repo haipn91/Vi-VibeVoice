@@ -46,8 +46,10 @@ import time
 import traceback
 from pathlib import Path
 
+# ASR/CAPU helpers live in this directory (gipformer_asr.py, vi_capu_punctuate.py, …).
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "examples"))
+_PY_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(_PY_DIR))
 
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
