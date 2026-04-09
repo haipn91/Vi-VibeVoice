@@ -5,15 +5,16 @@
   Speak naturally. Get text instantly. No friction.
 </p>
 
-<p align="center">
-  <img src="docs/images/home.png" alt="Vi-VibeVoice UI" width="800"/>
-</p>
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/platform-Windows-blue"/></a>
   <a href="#"><img src="https://img.shields.io/badge/language-Vietnamese-red"/></a>
   <a href="#"><img src="https://img.shields.io/badge/backend-FastAPI-green"/></a>
   <a href="#"><img src="https://img.shields.io/badge/license-MIT-yellow"/></a>
+</p>
+
+<p align="center">
+  <img src="docs/images/home.png" alt="Vi-VibeVoice UI" width="800"/>
 </p>
 
 ---
