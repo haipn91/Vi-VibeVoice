@@ -1,0 +1,6 @@
+# FastAPI hau xu ly text ASR qua vLLM (OpenAI-compatible /v1/chat/completions).
+# Cai: pip install -r python/requirements-llm-postprocess-api.txt
+#
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+httpx>=0.25.0

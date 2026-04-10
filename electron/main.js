@@ -1,4 +1,15 @@
-const { app, BrowserWindow, clipboard, globalShortcut, ipcMain, Menu, nativeImage, nativeTheme, screen } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  clipboard,
+  globalShortcut,
+  ipcMain,
+  Menu,
+  nativeImage,
+  nativeTheme,
+  screen,
+  Tray
+} = require("electron");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
@@ -68,6 +79,11 @@ let currentShortcut = DEFAULT_SHORTCUT;
 let lastShortcutRegistration = { ok: false, requested: "", active: null };
 /** Bundled `local_asr_server.py` child (fat Windows installer only). */
 let localAsrProcess = null;
+
+/** Windows/Linux: tray icon (notification area). */
+let tray = null;
+/** True only when user chose Quit or app is exiting for real — allows main window to close. */
+let appQuitting = false;
 
 const LOCAL_ASR_PORT = 18765;
 
@@ -510,16 +526,8 @@ function registerShortcut(shortcut) {
     active: ok ? active : null
   };
   currentShortcut = ok ? active : requested;
-  if (ok && active !== requested) {
-    try {
-      const cfg = loadConfig();
-      if (cfg.shortcuts && cfg.shortcuts.toggleRecording !== active) {
-        saveConfig({ ...cfg, shortcuts: { ...cfg.shortcuts, toggleRecording: active } });
-      }
-    } catch (_e) {
-      /* ignore */
-    }
-  }
+  /** Do NOT write fallback shortcut to disk — that made the key "jump" after restart when the
+   *  preferred key was still held by a zombie process or conflict. User changes only via Settings. */
   return currentShortcut;
 }
 
@@ -570,6 +578,98 @@ function createWindow() {
 
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(app.getAppPath(), "src", "index.html"));
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
+  if (process.platform !== "darwin") {
+    mainWindow.on("close", (e) => {
+      destroyRecordingHudWindow();
+      if (appQuitting) {
+        return;
+      }
+      e.preventDefault();
+      try {
+        mainWindow.setSkipTaskbar(true);
+      } catch (_e2) {}
+      mainWindow.hide();
+    });
+  } else {
+    mainWindow.on("close", () => {
+      destroyRecordingHudWindow();
+    });
+  }
+}
+
+function destroyTray() {
+  if (tray) {
+    try {
+      tray.destroy();
+    } catch (_e) {}
+    tray = null;
+  }
+}
+
+function showMainFromTray() {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+    if (process.platform !== "darwin") {
+      createTray();
+    }
+    return;
+  }
+  try {
+    if (process.platform !== "darwin") {
+      mainWindow.setSkipTaskbar(false);
+    }
+  } catch (_e) {}
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+function quitFromTray() {
+  appQuitting = true;
+  destroyTray();
+  stopEmbeddedLocalAsr();
+  globalShortcut.unregisterAll();
+  destroyRecordingHudWindow();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.destroy();
+  }
+  app.quit();
+}
+
+function createTray() {
+  if (process.platform === "darwin") {
+    return;
+  }
+  destroyTray();
+  const iconPath = path.join(app.getAppPath(), "assets", "icon.png");
+  if (!fs.existsSync(iconPath)) {
+    return;
+  }
+  let image = nativeImage.createFromPath(iconPath);
+  if (image.isEmpty()) {
+    return;
+  }
+  if (process.platform === "win32") {
+    try {
+      image = image.resize({ width: 16, height: 16 });
+    } catch (_e) {}
+  }
+  tray = new Tray(image);
+  tray.setToolTip("Vi-VibeVoice");
+  const menu = Menu.buildFromTemplate([
+    { label: "Open Vi-VibeVoice", click: () => showMainFromTray() },
+    { type: "separator" },
+    { label: "Quit", click: () => quitFromTray() }
+  ]);
+  tray.setContextMenu(menu);
+  tray.on("double-click", () => showMainFromTray());
 }
 
 function formatLogDetail(detail) {
@@ -695,42 +795,60 @@ ipcMain.handle("stats:add", (_event, payload) => {
   return s;
 });
 
-app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
-  ensureUserConfig();
-  if (process.platform === "darwin" && app.dock) {
-    const dockIcon = path.join(app.getAppPath(), "assets", "icon.png");
-    if (fs.existsSync(dockIcon)) {
-      try {
-        app.dock.setIcon(dockIcon);
-      } catch (_e) {
-        /* optional */
+/** Chi mot instance: tranh 2 process, tranh globalShortcut bi instance cu giu. */
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    showMainFromTray();
+  });
+
+  app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
+    ensureUserConfig();
+    if (process.platform === "darwin" && app.dock) {
+      const dockIcon = path.join(app.getAppPath(), "assets", "icon.png");
+      if (fs.existsSync(dockIcon)) {
+        try {
+          app.dock.setIcon(dockIcon);
+        } catch (_e) {
+          /* optional */
+        }
       }
     }
-  }
-  createWindow();
-  const config = loadConfig();
-  registerShortcut(config.shortcuts.toggleRecording);
-  startEmbeddedLocalAsrIfNeeded();
+    createWindow();
+    if (process.platform !== "darwin") {
+      createTray();
+    }
+    const config = loadConfig();
+    registerShortcut(config.shortcuts.toggleRecording);
+    startEmbeddedLocalAsrIfNeeded();
 
-  try {
-    screen.on("display-metrics-changed", () => {
-      if (recordingHudWindow && !recordingHudWindow.isDestroyed()) {
-        repositionRecordingHud(recordingHudWindow);
+    try {
+      screen.on("display-metrics-changed", () => {
+        if (recordingHudWindow && !recordingHudWindow.isDestroyed()) {
+          repositionRecordingHud(recordingHudWindow);
+        }
+      });
+    } catch (_e) {
+      /* optional */
+    }
+
+    app.on("activate", () => {
+      if (process.platform === "darwin") {
+        if (BrowserWindow.getAllWindows().length === 0) {
+          createWindow();
+        }
+      } else {
+        showMainFromTray();
       }
     });
-  } catch (_e) {
-    /* optional */
-  }
-
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
   });
-});
+}
 
 app.on("will-quit", () => {
+  destroyTray();
   stopEmbeddedLocalAsr();
   globalShortcut.unregisterAll();
   destroyRecordingHudWindow();

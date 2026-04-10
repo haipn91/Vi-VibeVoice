@@ -131,7 +131,7 @@ Vietnamese speech recognition systems often face two main limitations:
 
 ### 1. Download Installer
 
-👉 **[Download Vi-VibeVoice (Windows)](https://github.com/haipn91/Vi-VibeVoice/releases/Vi-VibeVoice-0.2.0-slim-Setup.exe)**
+👉 **[Download Vi-VibeVoice (Windows)](https://github.com/haipn91/Vi-VibeVoice/releases/Vi-VibeVoice-0.2.1-slim-Setup.exe)**
 
 
 ---

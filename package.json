@@ -1,6 +1,6 @@
 {
   "name": "vi-vibevoice",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Lightweight desktop speech-to-text client: records audio and sends it to a configurable remote ASR API.",
   "main": "electron/main.js",
   "scripts": {
