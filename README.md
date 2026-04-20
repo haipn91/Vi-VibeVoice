@@ -133,6 +133,9 @@ Vietnamese speech recognition systems often face two main limitations:
 
 👉 **[Download Vi-VibeVoice (Windows)](https://github.com/haipn91/Vi-VibeVoice/releases/Vi-VibeVoice-0.2.1-slim-Setup.exe)**
 
+👉 **[Download Vi-VibeVoice Slim (Google Drive Mirror)](https://drive.google.com/file/d/1pkEjJ99C5M43bKaR3Zbg9mzvDXUofjjh/view?usp=sharing)** *(recommended if GitHub download is slow or blocked)*
+
+👉 **Slim version includes internal ASR model for faster offline setup.**
 
 ---
 
